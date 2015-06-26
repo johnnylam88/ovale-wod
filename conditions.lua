@@ -1444,15 +1444,22 @@ do
 		local useTagged = profile.apparence["taggedEnemies"]
 		local value = state.enemies
 		if not value then
-			if namedParams.tagged == 1 then
-				value = state.taggedEnemies
-			else
+			-- No tagged parameter set so respect the Advanced Options setting
+			if not namedParams.tagged then
 				-- This will return the enemies based on the Tagged Enemies option in the Advanced Options
 				if not useTagged or useTagged ~= true then
 					value = state.activeEnemies
 				else
 					value = state.taggedEnemies
 				end
+			end
+			-- tagged=0 specified so override the Advanced Options setting and return Active Enemies
+			if namedParams.tagged == 0 then
+				value = state.activeEnemies
+			end
+			-- tagged=1 specified so override the Advanced Options setting and return Tagged Enemies
+			if namedParams.tagged == 1 then
+				value = state.taggedEnemies
 			end
 		end
 		-- This works around problems with testing on target dummies, which are never hostile.
