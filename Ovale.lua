@@ -329,30 +329,63 @@ function Ovale:GetListValue(name)
 	return widget and widget:GetValue()
 end
 
--- Set the k'th checkbox control to the specified on/off (true/false) value.
+-- Set the checkbox control to the specified on/off (true/false) value.
 function Ovale:SetCheckBox(k, on)
 	local profile = self.db.profile
-	for name, widget in pairs(self.checkBoxWidget) do
-		if k == 0 then
-			widget:SetValue(on)
-			profile.check[name] = on
-			break
+
+        -- New check I added to determine if k is a number
+	if type(k) == "number" then
+		-- Its a number so run the already existing code
+		for name, widget in pairs(self.checkBoxWidget) do
+			if k == 0 then
+				widget:SetValue(on)
+				profile.check[name] = on
+				break
+			end
+			k = k - 1
 		end
-		k = k - 1
+        -- New check I added to determine if k is a string
+	elseif type(k) == "string" then
+		-- Its a string so run my new code
+		if self.checkBoxWidget[k] then
+			local widget = self.checkBoxWidget[k]
+				
+			widget:SetValue(on)
+			profile.check[k] = on
+		end
+	else
+		-- Invalid parameter type passed so do nothing, this stops errors
 	end
 end
 
--- Toggle the k'th checkbox control.
+-- Toggle the checkbox control.
 function Ovale:ToggleCheckBox(k)
 	local profile = self.db.profile
-	for name, widget in pairs(self.checkBoxWidget) do
-		if k == 0 then
-			local on = not widget:GetValue()
-			widget:SetValue(on)
-			profile.check[name] = on
-			break
+
+        -- New check I added to determine if k is a number
+	if type(k) == "number" then
+		-- Its a number so run the already existing code
+		for name, widget in pairs(self.checkBoxWidget) do
+			if k == 0 then
+				local on = not widget:GetValue()
+				widget:SetValue(on)
+				profile.check[name] = on
+				break
+			end
+			k = k - 1
 		end
-		k = k - 1
+        -- New check I added to determine if k is a string
+	elseif type(k) == "string" then
+		-- Its a string so run my new code
+		if self.checkBoxWidget[k] then
+			local widget = self.checkBoxWidget[k]
+			local on = not widget:GetValue()
+				
+			widget:SetValue(on)
+			profile.check[k] = on
+		end
+	else
+		-- Invalid parameter type passed so do nothing, this stops errors
 	end
 end
 
