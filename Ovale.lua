@@ -337,6 +337,8 @@ function Ovale:SetCheckBox(name, on)
 		if widget then
 			widget:SetValue(on)
 			profile.check[name] = on
+			-- Send message checkbox has changed in case it is from a keybind
+			self:SendMessage("Ovale_CheckBoxValueChanged", name)
 		end
 	elseif type(name) == "number" then
 		-- "name" is a number, so count checkboxes until we reach the k'th one.
@@ -345,6 +347,8 @@ function Ovale:SetCheckBox(name, on)
 			if k == 0 then
 				widget:SetValue(on)
 				profile.check[name] = on
+				-- Send message checkbox has changed in case it is from a keybind
+				self:SendMessage("Ovale_CheckBoxValueChanged", name)
 				break
 			end
 			k = k - 1
@@ -361,6 +365,8 @@ function Ovale:ToggleCheckBox(name)
 			local on = not widget:GetValue()
 			widget:SetValue(on)
 			profile.check[name] = on
+			-- Send message checkbox has changed in case it is from a keybind
+			self:SendMessage("Ovale_CheckBoxValueChanged", name);
 		end
 	elseif type(name) == "number" then
 		-- "name" is a number, so count checkboxes until we reach the k'th one.
@@ -370,6 +376,8 @@ function Ovale:ToggleCheckBox(name)
 				local on = not widget:GetValue()
 				widget:SetValue(on)
 				profile.check[name] = on
+				-- Send message checkbox has changed in case it is from a keybind
+				self:SendMessage("Ovale_CheckBoxValueChanged", name);
 				break
 			end
 			k = k - 1
