@@ -163,8 +163,20 @@ function OvaleEnemies:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, cleuEvent, h
 		elseif IsFriendly(sourceFlags, true) and not IsFriendly(destFlags) and IsTagEvent(cleuEvent) then
 			-- Friendly group member attacks unfriendly enemy.
 			local now = API_GetTime()
+			--[[
+				I understand what you are trying to do here, but its not enough, this will only
+				count the player and their physical pet with a pet bar, you also need to count
+				guardians, such as shaman totems, shaman elementals, warlock doomguard, warlock grimoire
+				of service, monk storm earth and fire, etc...
+			]]
 			-- Treat both player and pet attacks as a player tag.
-			local isPlayerTag = (sourceGUID == self_playerGUID) or OvaleGUID:IsPlayerPet(sourceGUID)
+			-- local isPlayerTag = (sourceGUID == self_playerGUID) or OvaleGUID:IsPlayerPet(sourceGUID)
+			--[[
+				The following line checks the source units flags and if its affiliation is marked as mine
+				it will count the enemy as a tagged enemy, this counts anything under the direct or indirect
+				control of the player including guardians
+			]]			
+			local isPlayerTag = (bit_band(sourceFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) ~= 0)
 			self:AddEnemy(cleuEvent, destGUID, destName, now, isPlayerTag)
 		end
 	end
