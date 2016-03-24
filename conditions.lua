@@ -2105,6 +2105,87 @@ do
 	OvaleCondition:RegisterCondition("inflighttotarget", false, InFlightToTarget)
 end
 
+
+do
+    --- Returns whether an aura has less then 30% time left, accounting for travel time.
+    -- @name InPandemicRange
+    -- @paramsig number or boolean
+    -- @param auraID The aura spell ID.
+    -- @param spellID The base spell ID.
+    -- @param target Optional. Sets the target to check. The target may also be given as a prefix to the condition.
+    --     Defaults to target=player.
+    --     Valid values: player, target, focus, pet.
+    -- @return A boolean value based on if the aura has less then 30% time remaining.
+    local function InPandemicRange(positionalParams, namedParams, state, atTime)
+        local auraID, spellID = positionalParams[1], positionalParams[2]
+ 	local target, filter, mine = ParseCondition(positionalParams, namedParams, state)
+        local spellInfo = spellID and OvaleData.spellInfo[spellID]
+        local auraInfo = state:GetAura(target, auraID, filter, mine)
+        local returnValue = false
+        
+        if auraInfo then
+            local auraGain, auraStart, auraEnding = auraInfo.gain, auraInfo.start, auraInfo.ending
+            local baseDuration = OvaleData:GetBaseDuration(auraID, state)
+            local travelTime = (spellInfo and (spellInfo.travel_time or spellInfo.max_travel_time)) or 0
+
+            travelTime = ((travelTime > 0 and travelTime < 1) and 1) or travelTime           
+            returnValue = GetTime() >= auraEnding - (baseDuration * 0.3) - travelTime and GetTime() <= auraEnding
+        end
+		
+        return TestBoolean(returnValue)
+    end
+
+    OvaleCondition:RegisterCondition("inpandemicrange", false, InPandemicRange)
+end
+
+do
+    --- Get the number of seconds before the aura reaches pandemic range.
+    -- @name TimeToPandemicRange
+    -- @paramsig number or boolean
+    -- @param auraID The aura spell ID.
+    -- @param spellID The base spell ID.
+    -- @param operator Optional. Comparison operator: less, atMost, equal, atLeast, more.
+    -- @param number Optional. The number to compare against.
+    -- @param target Optional. Sets the target to check. The target may also be given as a prefix to the condition.
+    --     Defaults to target=player.
+    --     Valid values: player, target, focus, pet.
+    -- @param base Optional. By default, will use the time remaining on the current debuff. To estimate how long to pandemic if you were to apply now set base=1.
+    --     Defaults to base=0.
+    --     Valid values: 0, 1.
+    -- @return The number of seconds.
+    -- @return A boolean value for the result of the comparison.
+    local function TimeToPandemicRange(positionalParams, namedParams, state, atTime)
+        local auraID, spellID, comparator, limit = positionalParams[1], positionalParams[2], positionalParams[3], positionalParams[4]
+ 	local target, filter, mine = ParseCondition(positionalParams, namedParams, state)
+        local spellInfo = spellID and OvaleData.spellInfo[spellID]
+        local auraInfo = state:GetAura(target, auraID, filter, mine)
+        local returnValue = 0
+        
+        if namedParams.base == 1 and auraID then
+            local baseDuration = OvaleData:GetBaseDuration(auraID, state)
+            local travelTime = (spellInfo and (spellInfo.travel_time or spellInfo.max_travel_time)) or 0
+
+            travelTime = ((travelTime > 0 and travelTime < 1) and 1) or travelTime           
+            returnValue = baseDuration - (baseDuration * 0.3) - travelTime            
+        elseif auraInfo then
+            local auraGain, auraStart, auraEnding = auraInfo.gain, auraInfo.start, auraInfo.ending
+            local baseDuration = OvaleData:GetBaseDuration(auraID, state)
+            local travelTime = (spellInfo and (spellInfo.travel_time or spellInfo.max_travel_time)) or 0
+
+            travelTime = ((travelTime > 0 and travelTime < 1) and 1) or travelTime           
+            returnValue = auraEnding - (baseDuration * 0.3) - travelTime - GetTime()
+        end
+		
+        if returnValue < 0 then
+            returnValue = 0
+        end
+
+        return Compare(returnValue, comparator, limit)
+    end
+
+    OvaleCondition:RegisterCondition("timetopandemicrange", false, TimeToPandemicRange)
+end
+
 do
 	--- Test if the distance from the player to the target is within the spell's range.
 	-- @name InRange
